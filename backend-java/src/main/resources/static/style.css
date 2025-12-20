@@ -1,0 +1,14 @@
+/* Placeholder for static CSS file */
+/* This file is referenced in the <head> of view-recent.html */
+
+h1 {
+    color: #333;
+    border-bottom: 2px solid #4CAF50;
+    padding-bottom: 5px;
+}
+
+header p {
+    color: #666;
+    margin-bottom: 15px;
+}
+/* All table styles from the <style> block above could be moved here for a cleaner template */
