@@ -1,0 +1,16 @@
+# IDE specific files
+.idea/
+.vscode/
+*.swp
+*.iml
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Temporary files
+tmp/
+out/
