@@ -1,12 +1,13 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
-// import { Edit, Trash2, Calendar } from 'lucide-react';
 import { Edit, Trash2 } from 'lucide-react';
+import StatsDisplay from "./StatsDisplay";
 
 const MediaList = () => {
     const [entries, setEntries] = useState([]);
     const [days, setDays] = useState(30);
     const [currentPage, setCurrentPage] = useState(1);
+    const [selectedTitle, setSelectedTitle] = useState(null);
     const itemsPerPage = 20;
 
     // We wrap this in useCallback so it doesn't change on every render
@@ -39,6 +40,15 @@ const MediaList = () => {
     return (
         <div className="container">
             <h2>Media Entries</h2>
+
+            {/* Show the Go Stats here if a title is selected */}
+            {selectedTitle && (
+                <StatsDisplay
+                    title={selectedTitle}
+                    onClose={() => setSelectedTitle(null)}
+                />
+            )}
+
             <div className="filters">
                 {[3, 7, 30, 180].map(d => (
                     <button key={d} onClick={() => setDays(d)} className={days === d ? 'active' : ''}>
@@ -60,7 +70,9 @@ const MediaList = () => {
                 <tbody>
                 {currentItems.map(item => (
                     <tr key={item.id}>
-                        <td>{item.title}</td>
+                        <td onClick={() => setSelectedTitle(item.title)} style={{color: '#007bff', fontWeight: 'bold'}}>
+                            {item.title}
+                        </td>
                         <td>{item.date}</td>
                         <td>{item.type}</td>
                         <td>

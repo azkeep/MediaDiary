@@ -2,7 +2,7 @@ import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
 import MediaList from './pages/MediaList';
 import AddMedia from './pages/AddMedia';
-import Stats from './pages/Stats';
+import Stats from './pages/StatsDisplay';
 
 function App() {
   return (
