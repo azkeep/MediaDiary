@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import axios from 'axios';
 import { Edit, Trash2 } from 'lucide-react';
 import StatsDisplay from "./StatsDisplay";
@@ -9,6 +9,26 @@ const MediaList = () => {
     const [currentPage, setCurrentPage] = useState(1);
     const [selectedTitle, setSelectedTitle] = useState(null);
     const itemsPerPage = 20;
+    const [hoveredTitle, setHoveredTitle] = useState(null);
+    const [activeTooltip, setActiveTooltip] = useState(null);
+    const timerRef = useRef(null);
+
+    const handleMouseEnter = (title, id) => {
+        // Clear any existing timer using the ref
+        if (timerRef.current) clearTimeout(timerRef.current);
+
+        // 3. Store the new timer in the ref
+        timerRef.current = setTimeout(() => {
+            // Use a unique combination if you have duplicates,
+            // otherwise 'title' is fine for now
+            setActiveTooltip(title + id);
+        }, 300); // 300ms feels more "intentional"
+    };
+
+    const handleMouseLeave = () => {
+        if (timerRef.current) clearTimeout(timerRef.current);
+        setActiveTooltip(null);
+    };
 
     // We wrap this in useCallback so it doesn't change on every render
     const loadEntries = useCallback(async () => {
@@ -70,13 +90,26 @@ const MediaList = () => {
                 <tbody>
                 {currentItems.map(item => (
                     <tr key={item.id}>
-                        <td onClick={() => setSelectedTitle(item.title)} style={{color: '#007bff', fontWeight: 'bold'}}>
-                            {item.title}
+                        <td
+                            style={{ position: 'relative', cursor: 'help' }}
+                            onMouseEnter={() => handleMouseEnter(item.title, item.id)}
+                            onMouseLeave={handleMouseLeave}
+                        >
+                    <span style={{ color: '#007bff', fontWeight: '500' }}>
+                        {item.title}
+                    </span>
+
+                            {/* Check against Title + ID to solve the "duplicate" jump issue */}
+                            {activeTooltip === (item.title + item.id) && (
+                                <div className="stats-tooltip-floating">
+                                    <StatsDisplay title={item.title} isMini={true} />
+                                </div>
+                            )}
                         </td>
                         <td>{item.date}</td>
                         <td>{item.type}</td>
                         <td>
-                            <button onClick={() => window.location.href=`/edit/${item.id}`}><Edit size={16}/></button>
+                            <button onClick={() => window.location.href = `/edit/${item.id}`}><Edit size={16}/></button>
                             <button onClick={() => handleDelete(item.id)}><Trash2 size={16}/></button>
                         </td>
                     </tr>
@@ -88,7 +121,8 @@ const MediaList = () => {
             <div className="pagination">
                 <button disabled={currentPage === 1} onClick={() => setCurrentPage(p => p - 1)}>Prev</button>
                 <span>Page {currentPage}</span>
-                <button disabled={indexOfLastItem >= entries.length} onClick={() => setCurrentPage(p => p + 1)}>Next</button>
+                <button disabled={indexOfLastItem >= entries.length} onClick={() => setCurrentPage(p => p + 1)}>Next
+                </button>
             </div>
         </div>
     );
