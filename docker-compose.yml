@@ -1,0 +1,41 @@
+services:
+  db:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${DB_NAME}
+    ports:
+      - "5432:5432"
+
+  java-backend:
+    build: ./backend-java
+    env_file: .env
+    ports:
+      - "8080:8080"
+    depends_on:
+      - db
+    environment:
+      SPRING_DATASOURCE_USERNAME: ${DB_USER}
+      SPRING_DATASOURCE_PASSWORD: ${DB_PASSWORD}
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db:${PORT_DB}/${DB_NAME}
+
+  go-stats:
+    build: ./service-golang
+    env_file: .env
+    ports:
+      - "${PORT_GO}:${PORT_GO}"
+    depends_on:
+      - db
+#    environment:
+#      - DB_HOST=db
+#      - DB_USER=${DB_USER}
+#      - DB_PASSWORD=${DB_PASSWORD}
+#      - DB_NAME=${DB_NAME}
+
+  frontend-react:
+    build: ./frontend-react
+    ports:
+      - "${PORT_REACT}:${PORT_REACT}"
+    stdin_open: true
+    tty: true

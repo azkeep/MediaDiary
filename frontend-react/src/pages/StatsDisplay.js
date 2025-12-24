@@ -1,44 +1,76 @@
-import React, {useState, useEffect} from 'react';
-import axios from "axios";
-import MediaList from "./MediaList";
+import React, {useState, useEffect, useRef} from 'react';
+import axios from 'axios';
+import {PieChart, Pie, Cell, ResponsiveContainer} from 'recharts';
+import styles from './StatsDisplay.module.css';
 
-const StatsDisplay = ({ title, onClose }) => {
+const StatsDisplay = ({title}) => {
     const [stats, setStats] = useState(null);
-    const [error, setError] = useState(null);
+    const containerRef = useRef(null);
 
     useEffect(() => {
-        if (!title) return;
-
-        // Call the Go service on port 8181
         axios.get(`http://localhost:8181/stats?title=${encodeURIComponent(title)}`)
-            .then(res => {
-                setStats(res.data);
-                setError(null);
-            })
-            .catch(err => {
-                if (err.response && err.response.status === 404) {
-                    setError("No historical data found.");
-                } else {
-                    setError("Stats service unreachable.");
-                }
-                setStats(null);
-            });
+            .then(res => setStats(res.data))
+            .catch(err => console.error(err));
     }, [title]);
 
+    if (!stats) return <div className="loading-small">...</div>;
+
+    // Prepare data for the Doughnut
+    // We calculate "Older" by subtracting 30-day count from Total
+    const data = [
+        {name: '7d', value: stats.last_7_days},
+        {name: '30d', value: stats.last_30_days - stats.last_7_days},
+        {name: 'Older', value: stats.total - stats.last_30_days},
+    ];
+
+// These strings must match the variable names in your CSS file
+    const colors = [
+        'var(--color-7d)',
+        'var(--color-30d)',
+        'var(--color-older)'
+    ];
+
     return (
-        <div className="stats-sidebar" style={{ padding: '15px', border: '1px solid #ccc', borderRadius: '8px', background: '#f9f9f9', marginTop: '20px' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                <h3>Quick Stats: {title}</h3>
-                <button onClick={onClose}>&times;</button>
-            </div>
-            {error && <p style={{ color: 'orange' }}>{error}</p>}
-            {stats && (
-                <div style={{ display: 'flex', gap: '20px' }}>
-                    <div>All Time: <strong>{stats.total}</strong></div>
-                    <div>Last 30 Days: <strong>{stats.last_30_days}</strong></div>
-                    <div>Last 180 Days: <strong>{stats.last_180_days}</strong></div>
+        <div ref={containerRef} className={styles.chartContainer}>
+            <span style={{fontSize: '0.8rem', fontWeight: 'bold'}}>{title} Activity</span>
+
+            <div style={{width: '100%', height: 120, position: 'relative'}}>
+                <ResponsiveContainer>
+                    <PieChart>
+                        <Pie
+                            data={data}
+                            innerRadius={35}
+                            outerRadius={50}
+                            paddingAngle={5}
+                            dataKey="value"
+                            stroke="none"
+                        >
+                            {data.map((entry, index) => (
+                                // Recharts can actually resolve 'var()' strings in many browsers!
+                                <Cell key={`cell-${index}`} fill={colors[index]}/>
+                            ))}
+                        </Pie>
+                    </PieChart>
+                </ResponsiveContainer>
+
+                {/* Center Text */}
+                <div style={{
+                    position: 'absolute',
+                    top: '50%',
+                    left: '50%',
+                    transform: 'translate(-50%, -50%)',
+                    fontSize: '1rem',
+                    fontWeight: 'bold'
+                }}>
+                    {stats.total}
                 </div>
-            )}
+            </div>
+
+            <div className={styles.legend}>
+                <span><b className={styles.dot7d}>●</b> 7d</span>
+                <span><b className={styles.dot30d}>●</b> 30d</span>
+                <span><b className={styles.dotOlder}>●</b> Older</span>
+            </div>
         </div>
     );
 };

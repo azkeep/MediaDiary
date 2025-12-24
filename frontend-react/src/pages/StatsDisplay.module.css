@@ -1,0 +1,26 @@
+/* StatsDisplay.module.css */
+
+.chartContainer {
+    /* Define variables here so they are scoped to this container */
+    --color-7d: #0088FE;
+    --color-30d: #00C49F;
+    --color-older: #FFBB28;
+
+    width: 240px;
+    background: white;
+    padding: 10px;
+    text-align: center;
+    border-radius: 8px;
+}
+
+.legend {
+    display: flex;
+    justify-content: space-around;
+    font-size: 0.7rem;
+    margin-top: 40px; /* Adjusted to clear the chart */
+}
+
+/* We use color: var(...) here for the legend dots */
+.dot7d { color: var(--color-7d); }
+.dot30d { color: var(--color-30d); }
+.dotOlder { color: var(--color-older); }
