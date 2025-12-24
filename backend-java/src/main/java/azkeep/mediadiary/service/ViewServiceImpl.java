@@ -18,7 +18,7 @@ public class ViewServiceImpl implements ViewService {
 
     @Override
     public List<MediaSelectedDto> getMediaLaterThan(LocalDate date) {
-        List<MediaSelected> recentMediaEntities = mediaSelectedRepo.findAllByDateGreaterThanEqualOrderByDateDesc(date);
+        List<MediaSelected> recentMediaEntities = mediaSelectedRepo.findByDateGreaterThanEqualOrderByDateDescTitleDesc(date);
 
         return recentMediaEntities.stream()
                 .map(mapper::toDto)
